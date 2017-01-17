@@ -1,0 +1,25 @@
+###Client tweets### 
+Client  -[tweet]->  -QueueTweet-   ->  TweetHandler.class   
+                                            -(if with image)->
+                                            ->  -QueueImage-        ->  ImageStorage.class          
+                                            ->  -QueueThumbnail-    ->  ThumbnailCreator.class  ->  -QueueImage-    ->  ImageStorage.class  -  TimeLineUpdater.class ->  -Timeline-
+                                            -(if only text)->                                                                                  TimeLineUpdater.class ->  -Timeline-
+
+###Client follow another###
+Client  -[follow_msg]->     -QueueUsers-   ->  User_handler.class (add follower)    -[response msg]->  -dynamic_Queue-     
+    |----create--->   -dynamic_Queue-
+
+###Client subscribe###
+Client  -[subscribe_msg]->     -QueueUsers-   ->  User_handler.class (add user)    -[response msg]->  -dynamic_Queue-     
+    |----create--->   -dynamic_Queue-
+
+###Client request timeline###
+Client  -[get_timeline]->     -QueueUsers-   ->  User_handler.class (retrieve timeline)    -[timeline]->  -dynamic_Queue-     
+    |----create--->   -dynamic_Queue-
+
+###Retrie full image###
+same as before???
+
+
+Ref for thumbnail creation
+http://stackoverflow.com/questions/1069095/how-do-you-create-a-thumbnail-image-out-of-a-jpeg-in-java
