@@ -1,8 +1,16 @@
 package common;
 
 import java.awt.Image;
+import java.io.Serializable;
 
-public class Tweet {
+public class Tweet implements Serializable {
+
+	@Override
+	public String toString() {
+		return "Tweet [user=" + user + ", image=" + image + ", text=" + text + "]";
+	}
+
+	private static final long serialVersionUID = 1L;
 	private final String user;
 	private final Image image;
 	private final String text;
