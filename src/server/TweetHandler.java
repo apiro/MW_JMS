@@ -19,7 +19,7 @@ import common.User;
 
 public class TweetHandler implements MessageListener{
 
-	static JMSContext jmsContext;
+	private JMSContext jmsContext;
 	private Queue saveQueue;
 	private Queue thumbnailQueue;
 	
@@ -73,7 +73,7 @@ public class TweetHandler implements MessageListener{
 			
 		} catch (JMSException e) {
 			e.printStackTrace();
-		}
+		}		
 	}
 
 	

@@ -1,6 +1,5 @@
 package common;
 
-import java.awt.Image;
 import java.io.Serializable;
 
 public class Tweet implements Serializable {
@@ -13,10 +12,10 @@ public class Tweet implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private final String user;
-	private final Image image;
+	private final byte[] image;
 	private final String text;
 
-	public Tweet(String user, Image image, String text) {
+	public Tweet(String user, byte[] image, String text) {
 		this.user = user;
 		this.image = image;
 		this.text = text;
@@ -26,7 +25,7 @@ public class Tweet implements Serializable {
 		return user;
 	}
 
-	public Image getImage() {
+	public byte[] getImage() {
 		return image;
 	}
 
