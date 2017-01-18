@@ -14,6 +14,7 @@ public class Tweet implements Serializable {
 	private final String user;
 	private final byte[] image;
 	private final String text;
+	private int imgName; //will be filled by server before inserting in image queues.
 
 	public Tweet(String user, byte[] image, String text) {
 		this.user = user;
@@ -31,5 +32,13 @@ public class Tweet implements Serializable {
 
 	public String getText() {
 		return text;
+	}
+
+	public int getImgName() {
+		return imgName;
+	}
+
+	public void setImgName(int imgName) {
+		this.imgName = imgName;
 	}
 }

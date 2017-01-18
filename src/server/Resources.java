@@ -10,9 +10,12 @@ public class Resources {
 	
 	private HashMap<String, User> users;
 	private HashMap<String, byte[]> images;
+	private int imgNameCounter;
 	
 	public Resources() {
 		users = new HashMap<String, User>();
+		images = new HashMap<String, byte[]>();
+		imgNameCounter = 0;
 	}
 	
 	// return 1 if correctly inserted, 0 if already exists
@@ -35,5 +38,9 @@ public class Resources {
 	
 	public byte[] getImage(String name){
 		return images.get(name);
+	}
+	
+	public int getNewImgName(){
+		return imgNameCounter++;
 	}
 }

@@ -7,17 +7,17 @@ import java.util.List;
 public class Timeline implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	private List<Tweet> tweets;
+	private List<FinalTweet> tweets;
 	
 	public Timeline() {
-		tweets = new ArrayList<Tweet>();
+		tweets = new ArrayList<FinalTweet>();
 	}
 	
-	public List<Tweet> getTweets() {
+	public List<FinalTweet> getTweets() {
 		return tweets;
 	}
 	
-	public void addTweet(Tweet tweet){
+	public void addTweet(FinalTweet tweet){
 		tweets.add(tweet);
 	}
 }

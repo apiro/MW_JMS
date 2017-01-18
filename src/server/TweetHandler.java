@@ -13,6 +13,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import common.FinalTweet;
 import common.Timeline;
 import common.Tweet;
 import common.User;
@@ -34,20 +35,20 @@ public class TweetHandler implements MessageListener, Runnable{
 			User user = Resources.RS.getUserById(userID);
 			if(user != null) {
 				if(tweet.getImage()==null){		//only message tweet
-					
 					List<User> followers = user.getFollower();
+					FinalTweet ft = new FinalTweet(userID, tweet.getText());
 					for(User u : followers){
 						Timeline timeline = u.getMytimeline();
-						timeline.addTweet(tweet);
+						timeline.addTweet(ft);
 					}
 				}else{				//contains image
+					tweet.setImgName(Resources.RS.getNewImgName());
 					jmsContext.createProducer().send(saveQueue, tweet);  //save Image				
 					jmsContext.createProducer().send(thumbnailQueue, tweet);	//create thumbnail
 				}
 				jmsContext.createProducer().send(replyToQueue, "message processed");	
 			}else
 				jmsContext.createProducer().send(replyToQueue, "user not registered");
-				
 			
 		} catch (JMSException e) {
 			e.printStackTrace();
