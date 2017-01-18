@@ -37,7 +37,7 @@ public class ThumbnailCreator implements MessageListener, Runnable {
 			e.printStackTrace();
 		}
 
-		System.out.println("Thumbnail creator started");
+		System.out.println("> Thumbnail creator started");
 	}
 	
 	private Context getContext() throws NamingException {

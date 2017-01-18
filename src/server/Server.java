@@ -17,7 +17,7 @@ public class Server{
 		Thread thumbnailCreator = new Thread(new ThumbnailCreator());
 		thumbnailCreator.start();
 				
-		System.out.println("The Server is waiting for communication...");
+		System.out.println("> The Server is waiting for communication...");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         br.readLine();		
 	}

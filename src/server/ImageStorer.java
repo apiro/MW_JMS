@@ -36,7 +36,7 @@ public class ImageStorer implements MessageListener, Runnable {
 			e.printStackTrace();
 		}		
 		
-		System.out.println("Image saver started");
+		System.out.println("> Image storer started");
 	}
 	
 	private Context getContext() throws NamingException {

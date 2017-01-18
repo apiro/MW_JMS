@@ -79,7 +79,7 @@ public class TweetHandler implements MessageListener, Runnable{
 			e.printStackTrace();
 		}
 
-		System.out.println("Tweet handler started");
+		System.out.println("> Tweet handler started");
 	}
 	
 	private Context getContext() throws NamingException {

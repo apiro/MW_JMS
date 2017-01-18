@@ -32,9 +32,13 @@ public class Client implements MessageListener {
 		
 		String publishQueueName = "tweetQueue";
 		
+		System.out.println("> first ... ");
+		
 		Context initialContext = Client.getContext(); 
+		System.out.println("> second ... ");
 		JMSContext jmsContext = ((ConnectionFactory) initialContext.lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
 		
+		System.out.println("> third ... ");
 		Queue publishQueue = (Queue) initialContext.lookup(publishQueueName);
 		Queue subscribeQueue = jmsContext.createTemporaryQueue();
 		
