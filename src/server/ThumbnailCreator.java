@@ -11,11 +11,18 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class ThumbnailCreator implements MessageListener {
+public class ThumbnailCreator implements MessageListener, Runnable {
 
 	private JMSContext jmsContext;
 	
-	public ThumbnailCreator() {
+	@Override
+	public void onMessage(Message msg) {
+		
+	}
+
+	
+	@Override
+	public void run() {
 		Context initialContext;
 		try {
 			initialContext = getContext();
@@ -29,13 +36,9 @@ public class ThumbnailCreator implements MessageListener {
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	@Override
-	public void onMessage(Message msg) {
-		
-	}
 
+		System.out.println("Thumbnail creator started");
+	}
 	
 	private Context getContext() throws NamingException {
 		Properties props = new Properties();
@@ -44,7 +47,5 @@ public class ThumbnailCreator implements MessageListener {
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
 		return new InitialContext(props);
 	}
-	
-
 
 }

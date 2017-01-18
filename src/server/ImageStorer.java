@@ -11,11 +11,17 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class ImageStorer implements MessageListener {
+public class ImageStorer implements MessageListener, Runnable {
 
 	private JMSContext jmsContext;
-	
-	public ImageStorer() {
+
+	@Override
+	public void onMessage(Message msg) {
+		
+	}
+
+	@Override
+	public void run() {
 		Context initialContext;
 		try {
 			initialContext = getContext();
@@ -28,14 +34,10 @@ public class ImageStorer implements MessageListener {
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public void onMessage(Message msg) {
+		}		
 		
+		System.out.println("Image saver started");
 	}
-
 	
 	private Context getContext() throws NamingException {
 		Properties props = new Properties();
@@ -44,7 +46,4 @@ public class ImageStorer implements MessageListener {
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
 		return new InitialContext(props);
 	}
-	
-
-
 }

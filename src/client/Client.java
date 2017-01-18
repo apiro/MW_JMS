@@ -1,9 +1,11 @@
 package client;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 import javax.jms.JMSContext;
@@ -38,6 +40,8 @@ public class Client implements MessageListener {
 		
 		JMSProducer jmsProducer = jmsContext.createProducer().setJMSReplyTo(subscribeQueue);
 		
+		jmsContext.createConsumer(subscribeQueue).setMessageListener(new Client());
+		
 		sendTweet(jmsProducer, publishQueue);
 		
 	}
@@ -60,18 +64,20 @@ public class Client implements MessageListener {
 		ImageIO.write(fakeImage, "jpg", baos );
 		byte[] fakeImageInByte=baos.toByteArray();
 		
-		Tweet tweet = new Tweet(fakeUserName, fakeImageInByte, fakeText);
+		Tweet tweet = new Tweet(fakeUserName, null, fakeText);
 		
 		System.out.println(tweet);
 		
 		jmsProducer.send(publishQueue, tweet);
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        br.readLine();
 	}
 
 	@Override
 	public void onMessage(Message msg) {
 		try {
-			Timeline timeline = msg.getBody(Timeline.class);
-			this.renderTimeline(timeline);
+			System.out.println(msg.getBody(String.class));
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

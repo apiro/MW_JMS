@@ -1,21 +1,24 @@
 package server;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 
 public class Server{
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
-		new TweetHandler();
+		Thread tweetHandler = new Thread(new TweetHandler());
+		tweetHandler.start();
 		
-		new ImageStorer();
+		Thread imageStorer = new Thread(new ImageStorer());
+		imageStorer.start();
 		
-		new ThumbnailCreator();
-		
-		
+		Thread thumbnailCreator = new Thread(new ThumbnailCreator());
+		thumbnailCreator.start();
 				
 		System.out.println("The Server is waiting for communication...");
-		//BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-		//bufferedReader.readLine();
-		
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        br.readLine();		
 	}
 }

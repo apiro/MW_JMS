@@ -17,13 +17,45 @@ import common.Timeline;
 import common.Tweet;
 import common.User;
 
-public class TweetHandler implements MessageListener{
+public class TweetHandler implements MessageListener, Runnable{
 
 	private JMSContext jmsContext;
 	private Queue saveQueue;
 	private Queue thumbnailQueue;
 	
-	public TweetHandler() {
+	@Override
+	public void onMessage(Message msg) {
+		//check content of tweet
+		try {
+			Queue replyToQueue = (Queue)msg.getJMSReplyTo();
+			Tweet tweet = msg.getBody(Tweet.class);
+			System.out.println(tweet.toString());
+			String userID = tweet.getUser();
+			User user = Resources.RS.getUserById(userID);
+			if(user != null) {
+				if(tweet.getImage()==null){		//only message tweet
+					
+					List<User> followers = user.getFollower();
+					for(User u : followers){
+						Timeline timeline = u.getMytimeline();
+						timeline.addTweet(tweet);
+					}
+				}else{				//contains image
+					jmsContext.createProducer().send(saveQueue, tweet);  //save Image				
+					jmsContext.createProducer().send(thumbnailQueue, tweet);	//create thumbnail
+				}
+				jmsContext.createProducer().send(replyToQueue, "message processed");	
+			}else
+				jmsContext.createProducer().send(replyToQueue, "user not registered");
+				
+			
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}		
+	}
+
+	@Override
+	public void run() {
 		Context initialContext;
 		try {
 			initialContext = getContext();
@@ -42,41 +74,13 @@ public class TweetHandler implements MessageListener{
 			//lookup thumbnailQueue
 			String thumbnailQueueName ="thumbnailQueue";
 			thumbnailQueue = (Queue) initialContext.lookup(thumbnailQueueName);
-
+			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	@Override
-	public void onMessage(Message msg) {
-		//check content of tweet
-		try {
-			Queue replyToQueue = (Queue)msg.getJMSReplyTo();
-			Tweet tweet = msg.getBody(Tweet.class);
-			
-			if(tweet.getImage()==null){		//only message tweet
-				String userID = tweet.getUser();
-				User user = Resources.RS.getUserById(userID);
-				List<User> followers = user.getFollower();
-				for(User u : followers){
-					Timeline timeline = u.getMytimeline();
-					timeline.addTweet(tweet);
-				}
-			}else{				//contains image
-				jmsContext.createProducer().send(saveQueue, tweet);  //save Image				
-				jmsContext.createProducer().send(thumbnailQueue, tweet);	//create thumbnail
-			}
-			
-			jmsContext.createProducer().send(replyToQueue, "message processed");	
-			
-			
-		} catch (JMSException e) {
-			e.printStackTrace();
-		}		
-	}
 
-	
+		System.out.println("Tweet handler started");
+	}
 	
 	private Context getContext() throws NamingException {
 		Properties props = new Properties();
@@ -85,6 +89,4 @@ public class TweetHandler implements MessageListener{
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
 		return new InitialContext(props);
 	}
-	
-
 }
