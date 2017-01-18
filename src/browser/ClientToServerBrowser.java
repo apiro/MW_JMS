@@ -31,7 +31,7 @@ public class ClientToServerBrowser {
 		
 		JMSContext context = ((ConnectionFactory) getContext().lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
 		
-		queueName = "clientToServer";
+		queueName = "tweetQueue";
 		
 		queueToExamine = (Queue)getContext().lookup(queueName);
 		browser = context.createBrowser(queueToExamine);

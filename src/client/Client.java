@@ -1,6 +1,7 @@
 package client;
 
-import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -27,7 +28,7 @@ public class Client implements MessageListener {
 		
 		System.out.println("> Starting Client ... ");
 		
-		String publishQueueName = "clientToServer";
+		String publishQueueName = "tweetQueue";
 		
 		Context initialContext = Client.getContext(); 
 		JMSContext jmsContext = ((ConnectionFactory) initialContext.lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
@@ -52,9 +53,14 @@ public class Client implements MessageListener {
 	private static void sendTweet(JMSProducer jmsProducer, Queue publishQueue) throws IOException {
 		
 		String fakeUserName = "fakeUserName";
-		Image fakeImage = ImageIO.read(new File("resources/frank.png"));
+		BufferedImage fakeImage = ImageIO.read(new File("resources/frank.png"));
 		String fakeText = "fakeText";
-		Tweet tweet = new Tweet(fakeUserName, fakeImage, fakeText);
+		
+		ByteArrayOutputStream baos=new ByteArrayOutputStream();
+		ImageIO.write(fakeImage, "jpg", baos );
+		byte[] fakeImageInByte=baos.toByteArray();
+		
+		Tweet tweet = new Tweet(fakeUserName, fakeImageInByte, fakeText);
 		
 		System.out.println(tweet);
 		
