@@ -11,11 +11,11 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class ImageStorage implements MessageListener {
+public class ImageStorer implements MessageListener {
 
 	private JMSContext jmsContext;
 	
-	public ImageStorage() {
+	public ImageStorer() {
 		Context initialContext;
 		try {
 			initialContext = getContext();

@@ -7,7 +7,9 @@ public class Server{
 		
 		new TweetHandler();
 		
+		new ImageStorer();
 		
+		new ThumbnailCreator();
 		
 		
 				

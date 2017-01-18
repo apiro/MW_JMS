@@ -9,6 +9,7 @@ public class Resources {
 	public static Resources RS = new Resources();
 	
 	private HashMap<String, User> users;
+	private HashMap<String, byte[]> images;
 	
 	public Resources() {
 		users = new HashMap<String, User>();
@@ -26,5 +27,13 @@ public class Resources {
 	
 	public User getUserById(String id){
 		return users.get(id);
+	}
+	
+	public void saveImage(String name, byte[] image){
+		images.put(name, image);
+	}
+	
+	public byte[] getImage(String name){
+		return images.get(name);
 	}
 }
