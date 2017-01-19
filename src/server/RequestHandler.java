@@ -11,22 +11,16 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.sun.messaging.jms.JMSException;
 
-public class ThumbnailCreator implements MessageListener, Runnable {
+public class RequestHandler implements MessageListener, Runnable{
 
 	private JMSContext jmsContext;
 	
 	@Override
 	public void onMessage(Message msg) {
-		//try{
-			System.out.println(msg);
-		//}catch(JMSException e){
-		//	e.printStackTrace();
-		//}
+		
 	}
 
-	
 	@Override
 	public void run() {
 		Context initialContext;
@@ -34,16 +28,15 @@ public class ThumbnailCreator implements MessageListener, Runnable {
 			initialContext = getContext();
 			jmsContext = ((ConnectionFactory) initialContext.lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
 			
-			//lookup saveQueue
-			String thumbnailQueueName ="thumbnailQueue";
-			Queue thumbnailQueue = (Queue) initialContext.lookup(thumbnailQueueName);
-			jmsContext.createConsumer(thumbnailQueue).setMessageListener(this);
-			
+			//lookup tweetQueue and set messageListener
+			String requestQueueName ="requestQueue";
+			Queue requestQueue = (Queue) initialContext.lookup(requestQueueName);
+			jmsContext.createConsumer(requestQueue).setMessageListener(this);
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
 
-		System.out.println("> Thumbnail creator started");
+		System.out.println("> Request queue started");
 	}
 	
 	private Context getContext() throws NamingException {
@@ -52,6 +45,5 @@ public class ThumbnailCreator implements MessageListener, Runnable {
 		props.setProperty("java.naming.factory.url.pkgs", "com.sun.enterprise.naming");
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
 		return new InitialContext(props);
-	}
-
+	}	
 }

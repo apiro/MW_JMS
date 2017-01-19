@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 public class Server{
 
 	public static void main(String[] args) throws IOException {
+		Thread requestHandler = new Thread(new RequestHandler());
+		requestHandler.start();
 		
 		Thread tweetHandler = new Thread(new TweetHandler());
 		tweetHandler.start();
