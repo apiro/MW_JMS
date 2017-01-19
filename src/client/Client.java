@@ -20,17 +20,22 @@ import javax.naming.NamingException;
 
 import common.Timeline;
 import common.Tweet;
+import common.MessageType;
+import common.Request;
 
 import javax.imageio.ImageIO;
 import javax.jms.ConnectionFactory;
 
 public class Client implements MessageListener {
 	
+	static String username;
+	
 	public static void main(String[] args) throws NamingException, IOException {
 		
 		System.out.println("> Starting Client ... ");
 		
 		String publishQueueName = "tweetQueue";
+		String requestQueueName = "requestQueue";
 		
 		System.out.println("> first ... ");
 		
@@ -40,14 +45,21 @@ public class Client implements MessageListener {
 		
 		System.out.println("> third ... ");
 		Queue publishQueue = (Queue) initialContext.lookup(publishQueueName);
+		Queue requestQueue = (Queue) initialContext.lookup(requestQueueName);
 		Queue subscribeQueue = jmsContext.createTemporaryQueue();
 		
 		JMSProducer jmsProducer = jmsContext.createProducer().setJMSReplyTo(subscribeQueue);
 		
 		jmsContext.createConsumer(subscribeQueue).setMessageListener(new Client());
 		
-		sendTweet(jmsProducer, publishQueue);
+		// User registration
+
+		createRegistration(jmsProducer, requestQueue);
 		
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        br.readLine();	
+        
+        sendTweet(jmsProducer, publishQueue);
 	}
 
 	private static Context getContext() throws NamingException {
@@ -60,7 +72,7 @@ public class Client implements MessageListener {
 	
 	private static void sendTweet(JMSProducer jmsProducer, Queue publishQueue) throws IOException {
 		
-		String fakeUserName = "fakeUserName";
+		String fakeUserName = username;
 		BufferedImage fakeImage = ImageIO.read(new File("resources/frank.png"));
 		String fakeText = "fakeText";
 		
@@ -76,6 +88,15 @@ public class Client implements MessageListener {
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         br.readLine();
+	}
+	
+	private static boolean createRegistration(JMSProducer jmsProducer, Queue requestQueue){
+		username = "fakeUser";
+		System.out.println("Invio richiesta");
+		Request request = new Request(username, MessageType.SUBSCRIBE);
+		jmsProducer.send(requestQueue, request);
+		System.out.println("Richiesta Inviata");
+		return true;
 	}
 
 	@Override
