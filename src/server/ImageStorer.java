@@ -31,10 +31,9 @@ public class ImageStorer extends Handler implements MessageListener, Runnable {
 			
 			Tweet tweet = msg.getBody(Tweet.class);
 			print(tweet.toString());
-			Resources.RS.saveImage(tweet.getUsername(), tweet.getImage());
+			Resources.RS.saveImage(tweet.getImgName(), tweet.getImage());
 			print("image saved");
 	
-			
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}

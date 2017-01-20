@@ -55,6 +55,7 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 					tweet.setImgName(""+ Resources.RS.getNewImgName() + "");
 					jmsContext.createProducer().send(saveQueue, tweet); //save Image			
 					jmsContext.createProducer().send(thumbnailQueue, tweet); //create thumbnail
+					
 				}
 				jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.TWEET, 1));	
 			}else
