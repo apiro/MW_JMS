@@ -26,16 +26,17 @@ public class ClientToServerBrowser {
 		String queueName = null;
 		Queue queueToExamine = null;
 		QueueBrowser browser = null;
+		Boolean control = true;
 		
-		System.out.println("> Starting Browser ... ");
-		Boolean closeBrowser = false;
+		print("starting");
 		
 		JMSContext context = ((ConnectionFactory) getContext().lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
-		while(Boolean.FALSE.equals(closeBrowser)) {
+		while(control) {
 
+			print("Which queue do you want to inspect?");
 			queueName = br.readLine();
 			queueToExamine = (Queue)getContext().lookup(queueName);
 			browser = context.createBrowser(queueToExamine);
@@ -43,7 +44,7 @@ public class ClientToServerBrowser {
 			Enumeration<?> enumeration = browser.getEnumeration(); 
 			while(enumeration.hasMoreElements()) {
 				
-				System.out.println("Queue has elements ... ");
+				print("queue has elements ");
 				
 				Object obj = enumeration.nextElement();
 				ClientRequest request = null;
@@ -52,28 +53,35 @@ public class ClientToServerBrowser {
 					
 					objMsg = (ObjectMessage)obj;
 					request = (Tweet)objMsg.getObject();
-					System.out.println("Detected ClientRequest");
-					System.out.println("Sender -> " + request.getUsername());
-					System.out.println(" | Tweet -> " + request.toString());
+					print("Detected ClientRequest");
+					print("Sender -> " + request.getUsername());
+					print(" | Request -> " + request.toString());
 				
 				}
 			}
 			
-			System.out.println("Do you want to close the browser?");
+			print("Do you want to close the browser?");
 			String choice = br.readLine();
 			if(choice.equals("Yes")) {
-				closeBrowser = true;
+				control = false;
 			}
 		}
 		
 	}
 
 	private static Context getContext() throws NamingException {
+		
+		print("getContext");
+		
 		Properties props = new Properties();
 		props.setProperty("java.naming.factory.initial", "com.sun.enterprise.naming.SerialInitContextFactory");
 		props.setProperty("java.naming.factory.url.pkgs", "com.sun.enterprise.naming");
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
+		
 		return new InitialContext(props);
 	}
 	
+	public static void print(String s) {
+		System.out.println("> Browser > " + s);
+	}
 }

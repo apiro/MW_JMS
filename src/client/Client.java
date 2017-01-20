@@ -37,7 +37,6 @@ public class Client implements MessageListener {
 	
 	static String username = null;
 	static Boolean control = true;
-	static Boolean stop = true;
 	static Tweet tweet = null;
 	static byte[] fakeImageInByte = null;
 	
@@ -81,13 +80,20 @@ public class Client implements MessageListener {
 		
 		print("interact");
 		
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		print("Type your username: ");
+		username = br.readLine();
+		
 		while(control) {
 			
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			print("Type your username: ");
-			username = br.readLine();
 			print("Which action do you want to perform ?");
 			print("[1] Register | [2] Send Tweet | [3] RequestImage | [4] Follow | [5] RequestTimeline | DEFAULT QUITS");
+			
+			if(username == null) {
+				print("Type your username: ");
+				username = br.readLine();
+			}
+			
 	        String choice = br.readLine();	
 	        ClientRequest request = null;
 	      
@@ -101,7 +107,7 @@ public class Client implements MessageListener {
 					String caption = br.readLine();
 					
 					tweet.setText(caption);
-					print(tweet.toString() + "is going to be sent");
+					print(tweet.toString() + " is going to be sent");
 					sendRequest(jmsProducer, tweetQueue, tweet);
 					break;
 	        	case "3":
@@ -128,7 +134,6 @@ public class Client implements MessageListener {
 	        		control = false;
 	        		break;
 	        }
-	        while(stop){}
 		}
 		print("closing");
 		
@@ -136,14 +141,13 @@ public class Client implements MessageListener {
 
 	private static boolean sendRequest(JMSProducer jmsProducer, Queue requestQueue, ClientRequest request) {
 		
-		print("sendRequest");
-		print(request.getType().toString());
+		print("sendRequest - " + request.getType().toString());
 		
-		System.out.println("> Sending request");
+		print("> Sending request");
 		
 		jmsProducer.send(requestQueue, request);
 		
-		System.out.println("> Timeline sent");
+		print("> Request sent");
 		return true;
 		
 	}
@@ -167,7 +171,6 @@ public class Client implements MessageListener {
 		try {
 			
 			renderResponse(msg.getBody(ServerResponse.class));
-			stop = false;
 			
 		} catch (JMSException e) {
 

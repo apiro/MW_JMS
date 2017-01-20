@@ -57,10 +57,10 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					print("follow");
 					
 					if(follow(request)){
-						print("updated followers of user [ " + request.getUsername() + " ]");
+						print("updated following users by user [ " + request.getUsername() + " ]");
 						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.FOLLOW, 1));	
 					}else{
-						print("follow registration error");
+						print("following registration error");
 						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.FOLLOW, 0));	
 					}
 					break;
@@ -126,7 +126,7 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 			
 			for(String toAdd: usersToAdd) {
 				User userToAdd = Resources.RS.getUserById(toAdd);
-				user.addFollower(userToAdd);
+				userToAdd.addFollower(user);
 			}
 			
 			return true;
