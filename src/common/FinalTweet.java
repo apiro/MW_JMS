@@ -9,20 +9,15 @@ public class FinalTweet implements Serializable{
 	private String userId;
 	private String text;
 	private byte[] thumbnail;
-	private int imageName;
-	
-	
-	public FinalTweet(String userId, String text) {
-		this.userId = userId;
-		this.text = text;
+	private String imageName;
+
+	public FinalTweet(String userId, String text, byte[] thumbnail, String imageName) {
+		this.setImageName(imageName);
+		this.setText(text);
+		this.setThumbnail(thumbnail);
+		this.setUserId(userId);
 	}
-	
-	public FinalTweet(String userId, String text, byte[] thumbnail) {
-		this.userId = userId;
-		this.text = text;
-		this.thumbnail = thumbnail;
-	}
-	
+
 	public String getUserId() {
 		return userId;
 	}
@@ -32,7 +27,7 @@ public class FinalTweet implements Serializable{
 	public byte[] getThumbnail() {
 		return thumbnail;
 	}
-	public int getImageName() {
+	public String getImageName() {
 		return imageName;
 	}
 	public void setUserId(String userId) {
@@ -44,7 +39,7 @@ public class FinalTweet implements Serializable{
 	public void setThumbnail(byte[] thumbnail) {
 		this.thumbnail = thumbnail;
 	}
-	public void setImageName(int imageName) {
+	public void setImageName(String imageName) {
 		this.imageName = imageName;
 	}
 	

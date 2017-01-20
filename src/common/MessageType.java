@@ -4,5 +4,7 @@ public enum MessageType {
 	TIMELINE,
 	FOLLOW,
 	IMAGE,
-	SUBSCRIBE
+	SUBSCRIBE,
+	TWEET,
+	GENERICERROR
 }

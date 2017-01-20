@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
@@ -11,13 +12,32 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class ImageStorer implements MessageListener, Runnable {
+import common.Tweet;
+
+public class ImageStorer extends Handler implements MessageListener, Runnable {
+
+	public ImageStorer(String identity) {
+		super(identity);
+	}
 
 	private JMSContext jmsContext;
 
 	@Override
 	public void onMessage(Message msg) {
 		
+		print("onMessage");
+		
+		try {
+			
+			Tweet tweet = msg.getBody(Tweet.class);
+			print(tweet.toString());
+			Resources.RS.saveImage(tweet.getUsername(), tweet.getImage());
+			print("image saved");
+	
+			
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -36,14 +56,18 @@ public class ImageStorer implements MessageListener, Runnable {
 			e.printStackTrace();
 		}		
 		
-		System.out.println("> Image storer started");
+		print("started");
 	}
 	
 	private Context getContext() throws NamingException {
+		
+		print("getContext");
+		
 		Properties props = new Properties();
 		props.setProperty("java.naming.factory.initial", "com.sun.enterprise.naming.SerialInitContextFactory");
 		props.setProperty("java.naming.factory.url.pkgs", "com.sun.enterprise.naming");
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
+		
 		return new InitialContext(props);
 	}
 }

@@ -22,7 +22,7 @@ public class User {
 		this.id = id;
 	}
 
-	public List<User> getFollower() {
+	public List<User> getFollowers() {
 		return followers;
 	}
 	

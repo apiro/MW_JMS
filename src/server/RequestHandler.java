@@ -1,5 +1,6 @@
 package server;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
@@ -12,52 +13,85 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import common.AckResponse;
+import common.ClientRequest;
+import common.FollowRequest;
+import common.GenericErrorResponse;
+import common.ImageRequest;
+import common.ImageResponse;
 import common.MessageType;
-import common.Request;
-import common.Response;
 import common.Timeline;
+import common.TimelineResponse;
 import common.User;
 
-public class RequestHandler implements MessageListener, Runnable{
+public class RequestHandler extends Handler implements MessageListener, Runnable {
+
+	public RequestHandler(String identity) {
+		super(identity);
+	}
 
 	private JMSContext jmsContext;
 	
 	@Override
 	public void onMessage(Message msg) {
 		
+		print("onMessage");
+		
 		try {
 			Queue replyToQueue = (Queue) msg.getJMSReplyTo();
-			Request request = msg.getBody(Request.class);
+			ClientRequest request = msg.getBody(ClientRequest.class);
+		
 			switch(request.getType()){
 				case SUBSCRIBE:
-					// TODO - Creare una risposta sensata per i vari tipi di richieste. Meglio se un tipo per tutte le richieste
+					print("subscribe");
+					
 					if(createSubscription(request)){
-						System.out.println("Registrazione Utente OKAY");
-						jmsContext.createProducer().send(replyToQueue, new Response(MessageType.SUBSCRIBE, "OK"));	
+						print("new user registered [ " + request.getUsername() + " ]");
+						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.SUBSCRIBE, 1));	
 					}else{
-						System.out.println("Registrazione Utente KO");
-						jmsContext.createProducer().send(replyToQueue, new Response(MessageType.SUBSCRIBE, "KO"));	
+						print("user registration error");
+						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.SUBSCRIBE, 0));	
 					}
 					break;
 				case FOLLOW:
+					print("follow");
+					
 					if(follow(request)){
-						System.out.println("Follow OKAY");
-						jmsContext.createProducer().send(replyToQueue, new Response(MessageType.SUBSCRIBE, "OK"));	
+						print("updated followers of user [ " + request.getUsername() + " ]");
+						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.FOLLOW, 1));	
 					}else{
-						System.out.println("Follow KO");
-						jmsContext.createProducer().send(replyToQueue, new Response(MessageType.SUBSCRIBE, "KO"));	
+						print("follow registration error");
+						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.FOLLOW, 0));	
 					}
 					break;
 				case IMAGE:
-					System.out.println("getImage message");
-					jmsContext.createProducer().send(replyToQueue, new Response(MessageType.SUBSCRIBE, "null if failed", getImage(request)));
+					print("image");
+					byte[] replyImage = getImage(request);
+					
+					if(getImage(request) != null){
+						print("loaded image requestes by user [ " + request.getUsername() + " ]");
+						jmsContext.createProducer().send(replyToQueue, new ImageResponse(MessageType.IMAGE, 1, replyImage));
+					}else{
+						print("load image error");
+						jmsContext.createProducer().send(replyToQueue, new ImageResponse(MessageType.IMAGE, 0, replyImage));
+					}
 					break;
 				case TIMELINE:
-					System.out.println("getTimeline message");
-					jmsContext.createProducer().send(replyToQueue, new Response(MessageType.SUBSCRIBE, "null if failed", getTimeline(request)));
+					print("timeline");
+					Timeline replyTimeline = getTimeline(request);
+					
+					if(getTimeline(request) != null){
+						print("loaded image requestes by user [ " + request.getUsername() + " ]");
+						jmsContext.createProducer().send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 1, replyTimeline));
+					}else{
+						print("load image error");
+						jmsContext.createProducer().send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 0, replyTimeline));
+					}
 					break;
 				default:
-					System.out.println("Spero di non entrare qui");
+					print("the system can't detect the type of the ClientRequest, generic error is sent back");
+					
+					jmsContext.createProducer().send(replyToQueue, new GenericErrorResponse());
 					break;
 			}
 		} catch (JMSException e) {
@@ -68,33 +102,51 @@ public class RequestHandler implements MessageListener, Runnable{
 	/** Function that handles the subscription of a user, 
 	 * adding it to the Resources users
 	 */
-	private boolean createSubscription(Request request) {
-		User newUser = new User(request.getUserID());
+	private boolean createSubscription(ClientRequest request) {
+		
+		print("createSubscription");
+		
+		User newUser = new User(request.getUsername());
+		
 		return Resources.RS.addUser(newUser);	
+		
 	}
 	
 	/** Function that handles the follow operation 
 	 * adding user to the followers of toFollow user
 	 * return false if a user(sender or toFollow) doesn't exists
-	 */   //for the moment follow just one user at a time
-	private boolean follow(Request request){  
-		User user = Resources.RS.getUserById(request.getUserID());
-		String toFollow = (String)request.getParam().get(0);
-		if(user != null && toFollow != null){
-			User utf = Resources.RS.getUserById(toFollow);
-			if(utf != null){
-				utf.addFollower(user);
-				return true;
+	 */  
+	private boolean follow(ClientRequest request){  
+		
+		print("follow");
+		
+		User user = Resources.RS.getUserById(request.getUsername());
+		ArrayList<String> usersToAdd = ((FollowRequest)request).getUsers();
+		if(user != null && !usersToAdd.isEmpty()){
+			
+			for(String toAdd: usersToAdd) {
+				User userToAdd = Resources.RS.getUserById(toAdd);
+				user.addFollower(userToAdd);
 			}
+			
+			return true;
+			
+		} else {
+			
+			return false;
+			
 		}
-		return false;
+		
 	}
 	
 	/** Function that handles the request to get a Timenline 
-	 *  return a null if user doesn't exists - Lo so che non è elegante... si può cambiare
+	 *  return a null if user doesn't exists - Lo so che non ï¿½ elegante... si puï¿½ cambiare
 	 */ 
-	private Timeline getTimeline(Request request){
-		User user = Resources.RS.getUserById(request.getUserID());
+	private Timeline getTimeline(ClientRequest request){
+		
+		print("getTimeline");
+		
+		User user = Resources.RS.getUserById(request.getUsername());
 		if(user != null){
 			return user.getMytimeline();
 		}
@@ -102,13 +154,17 @@ public class RequestHandler implements MessageListener, Runnable{
 	}
 
 	/** Function that handles the request to get an image
-	 *  return a null if the image doesn't exist - Lo so che non è elegante... si può cambiare
+	 *  return a null if the image doesn't exist - Lo so che non ï¿½ elegante... si puï¿½ cambiare
 	 */ 
-	private byte[] getImage(Request request){
-		User user = Resources.RS.getUserById(request.getUserID());
-		int name = (int)request.getParam().get(0);
+	private byte[] getImage(ClientRequest request){
+		
+		print("getImage");
+		
+		User user = Resources.RS.getUserById(request.getUsername());
+		String name = ((ImageRequest)request).getImageID();
+		
 		if(user != null){
-			byte[] img = Resources.RS.getImage(Integer.toString(name));
+			byte[] img = Resources.RS.getImage(name);
 			return img;
 		}
 		return null;
@@ -130,14 +186,18 @@ public class RequestHandler implements MessageListener, Runnable{
 			e.printStackTrace();
 		}
 
-		System.out.println("> Request queue started");
+		print("started");
 	}
 	
 	private Context getContext() throws NamingException {
+		
+		print("getContext");
+		
 		Properties props = new Properties();
 		props.setProperty("java.naming.factory.initial", "com.sun.enterprise.naming.SerialInitContextFactory");
 		props.setProperty("java.naming.factory.url.pkgs", "com.sun.enterprise.naming");
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
+		
 		return new InitialContext(props);
 	}	
 }

@@ -1,9 +1,17 @@
 package server;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Properties;
 
+import javax.imageio.ImageIO;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
@@ -11,17 +19,52 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class ThumbnailCreator implements MessageListener, Runnable {
+import common.FinalTweet;
+import common.Timeline;
+import common.Tweet;
+import common.User;
+
+public class ThumbnailCreator extends Handler implements MessageListener, Runnable {
+
+	public ThumbnailCreator(String identity) {
+		super(identity);
+	}
 
 	private JMSContext jmsContext;
 	
 	@Override
 	public void onMessage(Message msg) {
-		//try{
+		
+		print("onMessage");
+		
+		try{
+			
+			Tweet tweet = msg.getBody(Tweet.class);
+			print(tweet.toString());
+			byte[] thumbnail = null;
+			
+			InputStream in = new ByteArrayInputStream(tweet.getImage());
+			BufferedImage img = (BufferedImage) ImageIO.read(in).getScaledInstance(100, 100, BufferedImage.SCALE_SMOOTH);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(img, "jpg", baos );
+			thumbnail = baos.toByteArray();
+			
+			FinalTweet finalTweet = new FinalTweet(tweet.getUsername(), tweet.getText(), thumbnail, tweet.getImgName());
+			User user = Resources.RS.getUserById(tweet.getUsername());
+			ArrayList<User> followers = (ArrayList<User>)user.getFollowers();
+			
+			for(User u : followers){
+				Timeline timeline = u.getMytimeline();
+				timeline.addTweet(finalTweet);
+			}
+			
 			System.out.println(msg);
-		//}catch(JMSException e){
-		//	e.printStackTrace();
-		//}
+			
+		} catch(JMSException e){
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	
@@ -41,14 +84,18 @@ public class ThumbnailCreator implements MessageListener, Runnable {
 			e.printStackTrace();
 		}
 
-		System.out.println("> Thumbnail creator started");
+		print("started");
 	}
 	
 	private Context getContext() throws NamingException {
+		
+		print("getContext");
+		
 		Properties props = new Properties();
 		props.setProperty("java.naming.factory.initial", "com.sun.enterprise.naming.SerialInitContextFactory");
 		props.setProperty("java.naming.factory.url.pkgs", "com.sun.enterprise.naming");
 		props.setProperty("java.naming.provider.url", "iiop://localhost:3700");
+		
 		return new InitialContext(props);
 	}
 

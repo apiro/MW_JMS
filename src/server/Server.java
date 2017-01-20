@@ -7,20 +7,29 @@ import java.io.InputStreamReader;
 public class Server{
 
 	public static void main(String[] args) throws IOException {
-		Thread requestHandler = new Thread(new RequestHandler());
+		
+		print("starting");
+		
+		Thread requestHandler = new Thread(new RequestHandler("RequestHandler"));
 		requestHandler.start();
 		
-		Thread tweetHandler = new Thread(new TweetHandler());
+		Thread tweetHandler = new Thread(new TweetHandler("TweetHandler"));
 		tweetHandler.start();
 		
-		Thread imageStorer = new Thread(new ImageStorer());
+		Thread imageStorer = new Thread(new ImageStorer("ImageStorer"));
 		imageStorer.start();
 		
-		Thread thumbnailCreator = new Thread(new ThumbnailCreator());
+		Thread thumbnailCreator = new Thread(new ThumbnailCreator("ThumbnailCreator"));
 		thumbnailCreator.start();
-				
-		System.out.println("> The Server is waiting for communication...");
+		
+		print("waiting for communication");
+		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         br.readLine();		
 	}
+	
+	public static void print(String s) {
+		System.out.println("> Server > " + s);
+	}
+	
 }

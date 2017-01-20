@@ -2,43 +2,43 @@ package common;
 
 import java.io.Serializable;
 
-public class Tweet implements Serializable {
-
-	@Override
-	public String toString() {
-		return "Tweet [user=" + user + ", text=" + text + "]";
-	}
-
-	private static final long serialVersionUID = 1L;
+public class Tweet extends ClientRequest implements Serializable {
 	
-	private final String user;
+	private static final long serialVersionUID = 1L;
 	private final byte[] image;
-	private final String text;
-	private int imgName; //will be filled by server before inserting in image queues.
+	private String text;
+	private String imgName; //will be filled by server before inserting in image queues.
 
-	public Tweet(String user, byte[] image, String text) {
-		this.user = user;
+	public Tweet(String username, byte[] image, String text) {
+		super(username, MessageType.TWEET);
+		this.setText(text);
 		this.image = image;
-		this.text = text;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public byte[] getImage() {
-		return image;
+		this.setImgName("");
 	}
 
 	public String getText() {
 		return text;
 	}
-
-	public int getImgName() {
+	public void setText(String text) {
+		this.text = text;
+	}
+	
+	public byte[] getImage() {
+		return image;
+	}
+	
+	public String getImgName() {
 		return imgName;
 	}
 
-	public void setImgName(int imgName) {
+	public void setImgName(String imgName) {
 		this.imgName = imgName;
 	}
+	
+	@Override
+	public String toString() {
+		return "Tweet [user=" + super.getUsername() + ", text=" + this.getText() + "]";
+	}
+
+
 }

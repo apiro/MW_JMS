@@ -16,6 +16,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import common.ClientRequest;
 import common.Tweet;
 
 public class ClientToServerBrowser {
@@ -31,14 +32,13 @@ public class ClientToServerBrowser {
 		
 		JMSContext context = ((ConnectionFactory) getContext().lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
 		
-		queueName = "tweetQueue";
-		
-		queueToExamine = (Queue)getContext().lookup(queueName);
-		browser = context.createBrowser(queueToExamine);
-		
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
 		while(Boolean.FALSE.equals(closeBrowser)) {
+
+			queueName = br.readLine();
+			queueToExamine = (Queue)getContext().lookup(queueName);
+			browser = context.createBrowser(queueToExamine);
 			
 			Enumeration<?> enumeration = browser.getEnumeration(); 
 			while(enumeration.hasMoreElements()) {
@@ -46,21 +46,21 @@ public class ClientToServerBrowser {
 				System.out.println("Queue has elements ... ");
 				
 				Object obj = enumeration.nextElement();
-				Tweet tweet = null;
+				ClientRequest request = null;
 				ObjectMessage objMsg = null;
 				if (obj instanceof ObjectMessage) {
 					
 					objMsg = (ObjectMessage)obj;
-					tweet = (Tweet)objMsg.getObject();
-					System.out.println("Detected tweet");
-					System.out.println("Sender -> " + tweet.getUser());
-					System.out.println(" | Tweet -> " + tweet.toString());
+					request = (Tweet)objMsg.getObject();
+					System.out.println("Detected ClientRequest");
+					System.out.println("Sender -> " + request.getUsername());
+					System.out.println(" | Tweet -> " + request.toString());
 				
 				}
 			}
 			
 			System.out.println("Do you want to close the browser?");
-			String choice = bufferedReader.readLine();
+			String choice = br.readLine();
 			if(choice.equals("Yes")) {
 				closeBrowser = true;
 			}
