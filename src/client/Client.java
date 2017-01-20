@@ -139,11 +139,11 @@ public class Client implements MessageListener {
 		print("sendRequest");
 		print(request.getType().toString());
 		
-		System.out.println("> Sending timeline request");
+		System.out.println("> Sending request");
 		
 		jmsProducer.send(requestQueue, request);
 		
-		System.out.println("> Timeline request sent");
+		System.out.println("> Timeline sent");
 		return true;
 		
 	}
