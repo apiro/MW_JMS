@@ -11,8 +11,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.sun.messaging.jms.JMSException;
-
 public class ThumbnailCreator implements MessageListener, Runnable {
 
 	private JMSContext jmsContext;
