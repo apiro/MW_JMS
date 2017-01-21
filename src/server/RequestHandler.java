@@ -68,7 +68,7 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					print("image");
 					byte[] replyImage = getImage(request);
 					
-					if(getImage(request) != null){
+					if(replyImage != null){
 						print("loaded image requestes by user [ " + request.getUsername() + " ]");
 						jmsContext.createProducer().send(replyToQueue, new ImageResponse(MessageType.IMAGE, 1, replyImage));
 					}else{
@@ -80,7 +80,7 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					print("timeline");
 					Timeline replyTimeline = getTimeline(request);
 					
-					if(getTimeline(request) != null){
+					if(replyTimeline != null){
 						print("loaded image requestes by user [ " + request.getUsername() + " ]");
 						jmsContext.createProducer().send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 1, replyTimeline));
 					}else{
@@ -140,7 +140,7 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 	}
 	
 	/** Function that handles the request to get a Timenline 
-	 *  return a null if user doesn't exists - Lo so che non � elegante... si pu� cambiare
+	 *  return a null if user doesn't exists
 	 */ 
 	private Timeline getTimeline(ClientRequest request){
 		
@@ -154,7 +154,7 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 	}
 
 	/** Function that handles the request to get an image
-	 *  return a null if the image doesn't exist - Lo so che non � elegante... si pu� cambiare
+	 *  return a null if the image doesn't exist
 	 */ 
 	private byte[] getImage(ClientRequest request){
 		

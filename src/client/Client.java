@@ -58,8 +58,6 @@ public class Client implements MessageListener {
 		
 		jmsContext.createConsumer(subscribeQueue).setMessageListener(new Client());
 		
-		initTweetTemplate();
-		
 		interact(requestQueue, tweetQueue, jmsProducer);
 		
 	}
@@ -103,6 +101,7 @@ public class Client implements MessageListener {
 	        		sendRequest(jmsProducer, requestQueue, request);
 	        		break;
 	        	case "2":
+	        		initTweetTemplate();
 					print("Type tweet caption: ");
 					String caption = br.readLine();
 					

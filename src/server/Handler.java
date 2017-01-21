@@ -1,6 +1,6 @@
 package server;
 
-public class Handler {
+public abstract class Handler {
 
 	private String identity;
 	
