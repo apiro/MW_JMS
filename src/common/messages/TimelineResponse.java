@@ -43,7 +43,7 @@ public class TimelineResponse extends ServerResponse {
 				try {
 					ByteArrayInputStream bais = new ByteArrayInputStream(ft.getThumbnail());
 					Image image = ImageIO.read(bais);
-					JFrame frame = new JFrame();
+					JFrame frame = new JFrame(ft.getUserId()+" - "+ft.getImageName());
 					frame.setSize(image.getWidth(null), image.getHeight(null));
 					JLabel label = new JLabel(new ImageIcon(image));
 					frame.add(label);

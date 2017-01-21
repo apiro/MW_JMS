@@ -24,6 +24,7 @@ import common.Tweet;
 import common.messages.ClientRequest;
 import common.messages.FollowRequest;
 import common.messages.ImageRequest;
+import common.messages.ImageResponse;
 import common.messages.MessageType;
 import common.messages.RegistrationRequest;
 import common.messages.ServerResponse;
@@ -66,7 +67,7 @@ public class Client implements MessageListener {
 		
 		print("initTweetTemplate");
 		
-		BufferedImage fakeImage = ImageIO.read(new File("resources/frank.png"));
+		BufferedImage fakeImage = ImageIO.read(new File("resources/sample.jpg"));
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ImageIO.write(fakeImage, "jpg", baos );
 		fakeImageInByte = baos.toByteArray();
@@ -180,10 +181,16 @@ public class Client implements MessageListener {
 
 	private void renderResponse(ServerResponse body) {
 		
-		ServerResponse bd = body;
+		ServerResponse bd;
 		print("renderResponse");
-		if(bd.getType() == MessageType.TIMELINE){
-			bd = (TimelineResponse) body;
+		switch(body.getType()){
+			case TIMELINE:
+				bd = (TimelineResponse) body;
+				break;
+			case IMAGE:
+				bd =(ImageResponse) body;
+			default:
+				bd = body;
 		}
 		print(bd.render());
 	}

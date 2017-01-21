@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
@@ -27,6 +28,8 @@ public class ClientToServerBrowser {
 		Queue queueToExamine = null;
 		QueueBrowser browser = null;
 		Boolean control = true;
+		HashMap<String, String> queueNames= new HashMap<String, String>();
+		initNames(queueNames);
 		
 		print("starting");
 		
@@ -37,7 +40,8 @@ public class ClientToServerBrowser {
 		while(control) {
 
 			print("Which queue do you want to inspect?");
-			queueName = br.readLine();
+			System.out.println("1 - tweetQueue\n2 - saveQueue\n3 - thumbnailQueue\n4 - requestQueue");
+			queueName = queueNames.get(br.readLine());
 			queueToExamine = (Queue)getContext().lookup(queueName);
 			browser = context.createBrowser(queueToExamine);
 			
@@ -56,7 +60,6 @@ public class ClientToServerBrowser {
 					print("Detected ClientRequest");
 					print("Sender -> " + request.getUsername());
 					print(" | Request -> " + request.toString());
-				
 				}
 			}
 			
@@ -83,5 +86,12 @@ public class ClientToServerBrowser {
 	
 	public static void print(String s) {
 		System.out.println("> Browser > " + s);
+	}
+	
+	private static void initNames(HashMap<String, String> queueNames){
+		queueNames.put("1", "tweetQueue");
+		queueNames.put("2", "saveQueue");
+		queueNames.put("3", "thumbnailQueue");
+		queueNames.put("4", "requestQueue");
 	}
 }
