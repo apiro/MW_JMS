@@ -16,8 +16,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import common.ClientRequest;
 import common.Tweet;
+import common.messages.ClientRequest;
 
 public class ClientToServerBrowser {
 	

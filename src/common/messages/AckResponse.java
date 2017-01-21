@@ -1,4 +1,4 @@
-package common;
+package common.messages;
 
 public class AckResponse extends ServerResponse implements Response{
 

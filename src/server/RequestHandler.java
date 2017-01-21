@@ -13,16 +13,16 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import common.AckResponse;
-import common.ClientRequest;
-import common.FollowRequest;
-import common.GenericErrorResponse;
-import common.ImageRequest;
-import common.ImageResponse;
-import common.MessageType;
 import common.Timeline;
-import common.TimelineResponse;
 import common.User;
+import common.messages.AckResponse;
+import common.messages.ClientRequest;
+import common.messages.FollowRequest;
+import common.messages.GenericErrorResponse;
+import common.messages.ImageRequest;
+import common.messages.ImageResponse;
+import common.messages.MessageType;
+import common.messages.TimelineResponse;
 
 public class RequestHandler extends Handler implements MessageListener, Runnable {
 
@@ -123,12 +123,17 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 		User user = Resources.RS.getUserById(request.getUsername());
 		ArrayList<String> usersToAdd = ((FollowRequest)request).getUsers();
 		if(user != null && !usersToAdd.isEmpty()){
-			
+			ArrayList<User> tmpUsers = new ArrayList<User>();
 			for(String toAdd: usersToAdd) {
 				User userToAdd = Resources.RS.getUserById(toAdd);
-				userToAdd.addFollower(user);
+				if(userToAdd == null)
+					return false;
+				else
+					tmpUsers.add(userToAdd);
 			}
-			
+			for (User u: tmpUsers){
+				u.addFollower(user);
+			}
 			return true;
 			
 		} else {

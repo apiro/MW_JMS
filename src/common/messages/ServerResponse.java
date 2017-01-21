@@ -1,6 +1,8 @@
-package common;
+package common.messages;
 
 import java.io.Serializable;
+
+import common.Timeline;
 
 public class ServerResponse implements Serializable, Response {
 
@@ -37,7 +39,6 @@ public class ServerResponse implements Serializable, Response {
 		this.type = type;
 	}
 
-	@Override
 	public String render(){
 		return "message of type " + this.getType().toString() + " returned with code " + this.getCode();
 	}

@@ -21,14 +21,14 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import common.Tweet;
-
-import common.TimelineRequest;
-import common.ClientRequest;
-import common.FollowRequest;
-import common.ImageRequest;
-import common.RegistrationRequest;
-
-import common.ServerResponse;
+import common.messages.ClientRequest;
+import common.messages.FollowRequest;
+import common.messages.ImageRequest;
+import common.messages.MessageType;
+import common.messages.RegistrationRequest;
+import common.messages.ServerResponse;
+import common.messages.TimelineRequest;
+import common.messages.TimelineResponse;
 
 import javax.imageio.ImageIO;
 import javax.jms.ConnectionFactory;
@@ -180,8 +180,12 @@ public class Client implements MessageListener {
 
 	private void renderResponse(ServerResponse body) {
 		
+		ServerResponse bd = body;
 		print("renderResponse");
-		print(body.render());
+		if(bd.getType() == MessageType.TIMELINE){
+			bd = (TimelineResponse) body;
+		}
+		print(bd.render());
 	}
 
 	public static void print(String s) {

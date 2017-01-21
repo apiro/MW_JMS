@@ -42,6 +42,11 @@ public class FinalTweet implements Serializable{
 	public void setImageName(String imageName) {
 		this.imageName = imageName;
 	}
+
+	@Override
+	public String toString() {
+		return "[User: " + userId + "] -  " + text + " --> imgRef: " + imageName + "\n";
+	}
 	
 	
 }

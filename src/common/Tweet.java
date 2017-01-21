@@ -2,6 +2,9 @@ package common;
 
 import java.io.Serializable;
 
+import common.messages.ClientRequest;
+import common.messages.MessageType;
+
 public class Tweet extends ClientRequest implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

@@ -13,12 +13,12 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import common.AckResponse;
 import common.FinalTweet;
-import common.MessageType;
 import common.Timeline;
 import common.Tweet;
 import common.User;
+import common.messages.AckResponse;
+import common.messages.MessageType;
 
 public class TweetHandler extends Handler implements MessageListener, Runnable{
 
