@@ -3,6 +3,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import browser.Browser;
+
 
 public class Server{
 
@@ -22,10 +24,15 @@ public class Server{
 		Thread thumbnailCreator = new Thread(new ThumbnailCreator("ThumbnailCreator"));
 		thumbnailCreator.start();
 		
+		Browser browser = new Browser();
+		browser.start();
+		
 		print("waiting for communication");
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        br.readLine();		
+        br.readLine();
+        
+        browser.control=false;
 	}
 	
 	public static void print(String s) {

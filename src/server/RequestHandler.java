@@ -196,8 +196,6 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 	
 	private Context getContext() throws NamingException {
 		
-		print("getContext");
-		
 		Properties props = new Properties();
 		props.setProperty("java.naming.factory.initial", "com.sun.enterprise.naming.SerialInitContextFactory");
 		props.setProperty("java.naming.factory.url.pkgs", "com.sun.enterprise.naming");
