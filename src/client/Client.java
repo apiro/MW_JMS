@@ -25,7 +25,6 @@ import common.messages.ClientRequest;
 import common.messages.FollowRequest;
 import common.messages.ImageRequest;
 import common.messages.ImageResponse;
-import common.messages.MessageType;
 import common.messages.RegistrationRequest;
 import common.messages.ServerResponse;
 import common.messages.TimelineRequest;
@@ -63,16 +62,19 @@ public class Client implements MessageListener {
 		
 	}
 
-	private static void initTweetTemplate() throws IOException {
+	private static void initTweetTemplate(boolean withImage) throws IOException {
 		
 		print("initTweetTemplate");
-		
-		BufferedImage fakeImage = ImageIO.read(new File("resources/sample.jpg"));
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(fakeImage, "jpg", baos );
-		fakeImageInByte = baos.toByteArray();
-		
-		tweet = new Tweet(username, fakeImageInByte, null);
+		if (withImage){
+			BufferedImage fakeImage = ImageIO.read(new File("resources/sample.jpg"));
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(fakeImage, "jpg", baos );
+			fakeImageInByte = baos.toByteArray();
+			
+			tweet = new Tweet(username, fakeImageInByte, null);
+		}else{
+			tweet = new Tweet(username, null, null);
+		}
 	}
 
 	private static void interact(Queue requestQueue, Queue tweetQueue, JMSProducer jmsProducer) throws IOException {
@@ -86,7 +88,7 @@ public class Client implements MessageListener {
 		while(control) {
 			
 			print("Which action do you want to perform ?");
-			print("[1] Register | [2] Send Tweet | [3] RequestImage | [4] Follow | [5] RequestTimeline | DEFAULT QUITS");
+			print("\n[1] Register \n[2] Send Tweet with Image \n[3] Send Tweet without Image \n[4] RequestImage \n[5] Follow \n[6] RequestTimeline \nDEFAULT QUITS");
 			
 			if(username == null) {
 				print("Type your username: ");
@@ -95,29 +97,39 @@ public class Client implements MessageListener {
 			
 	        String choice = br.readLine();	
 	        ClientRequest request = null;
-	      
+	        String caption = "";
+	        
 	        switch(choice) {
 	        	case "1": 
 	        		request = new RegistrationRequest(username);
 	        		sendRequest(jmsProducer, requestQueue, request);
 	        		break;
 	        	case "2":
-	        		initTweetTemplate();
+	        		initTweetTemplate(true);
 					print("Type tweet caption: ");
-					String caption = br.readLine();
+					caption = br.readLine();
 					
 					tweet.setText(caption);
 					print(tweet.toString() + " is going to be sent");
 					sendRequest(jmsProducer, tweetQueue, tweet);
 					break;
 	        	case "3":
+	        		initTweetTemplate(false);
+					print("Type tweet caption: ");
+					caption = br.readLine();
+					
+					tweet.setText(caption);
+					print(tweet.toString() + " is going to be sent");
+					sendRequest(jmsProducer, tweetQueue, tweet);
+					break;
+	        	case "4":
 	        		print("Type the image ID: ");
 	        		String imageID = br.readLine();
 	        		
 	        		request = new ImageRequest(username, imageID);
 	        		sendRequest(jmsProducer, requestQueue, request);
 	        		break;
-	        	case "4":
+	        	case "5":
 	        		print("Type the users you want to follow (space separated): ");
 	        		String[] followUsers = null;
 	        		String input = br.readLine();
@@ -126,7 +138,7 @@ public class Client implements MessageListener {
 	        		request = new FollowRequest(username, new ArrayList<String>(Arrays.asList(followUsers)));
 	        		sendRequest(jmsProducer, requestQueue, request);
 	        		break;
-	        	case "5":
+	        	case "6":
 	        		request = new TimelineRequest(username);
 	        		sendRequest(jmsProducer, requestQueue, request);
 	        		break;
