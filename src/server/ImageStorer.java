@@ -3,6 +3,7 @@ package server;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -21,16 +22,19 @@ public class ImageStorer extends Handler implements MessageListener, Runnable {
 	}
 
 	private JMSContext jmsContext;
+	private JMSConsumer consumer;
+	private int count = 0;
 
 	@Override
 	public void onMessage(Message msg) {
 		
 		print("onMessage");
+		count++;
 		
 		try {
 			
 			Tweet tweet = msg.getBody(Tweet.class);
-			print(tweet.toString());
+			//print(tweet.toString());
 			Resources.RS.saveImage(tweet.getImgName(), tweet.getImage());
 			print("image saved");
 	
@@ -49,13 +53,19 @@ public class ImageStorer extends Handler implements MessageListener, Runnable {
 			//lookup saveQueue
 			String saveQueueName ="saveQueue";
 			Queue saveQueue = (Queue) initialContext.lookup(saveQueueName);
-			jmsContext.createConsumer(saveQueue).setMessageListener(this);
+			consumer = jmsContext.createConsumer(saveQueue);
+			consumer.setMessageListener(this);
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}		
 		
 		print("started");
+	}
+	
+	public void stopListening(){
+		print("Stopping by browser, elaborated " + count);
+		consumer.close();
 	}
 	
 	private Context getContext() throws NamingException {

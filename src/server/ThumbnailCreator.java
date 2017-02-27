@@ -15,6 +15,7 @@ import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -36,16 +37,19 @@ public class ThumbnailCreator extends Handler implements MessageListener, Runnab
 	}
 
 	private JMSContext jmsContext;
+	private JMSConsumer consumer;
+	private int count = 0;
 	
 	@Override
 	public void onMessage(Message msg) {
 		
 		print("onMessage");
+		count ++;
 		
 		try{
 			
 			Tweet tweet = msg.getBody(Tweet.class);
-			print(tweet.toString());
+			//print(tweet.toString());
 			byte[] thumbnail = null;
 			
 			InputStream in = new ByteArrayInputStream(tweet.getImage());
@@ -64,7 +68,7 @@ public class ThumbnailCreator extends Handler implements MessageListener, Runnab
 				timeline.addTweet(finalTweet);
 			}
 			
-			System.out.println(msg);
+			//System.out.println(msg);
 			
 		} catch(JMSException e){
 			e.printStackTrace();
@@ -104,13 +108,19 @@ public class ThumbnailCreator extends Handler implements MessageListener, Runnab
 			//lookup saveQueue
 			String thumbnailQueueName ="thumbnailQueue";
 			Queue thumbnailQueue = (Queue) initialContext.lookup(thumbnailQueueName);
-			jmsContext.createConsumer(thumbnailQueue).setMessageListener(this);
+			consumer = jmsContext.createConsumer(thumbnailQueue);
+			consumer.setMessageListener(this);
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
 
 		print("started");
+	}
+	
+	public void stopListening(){
+		print("Stopping by browser, elaborated " + count);
+		consumer.close();
 	}
 	
 	private Context getContext() throws NamingException {

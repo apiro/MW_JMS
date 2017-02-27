@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
+import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
@@ -29,6 +31,9 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 	private JMSContext jmsContext;
 	private Queue saveQueue;
 	private Queue thumbnailQueue;
+	private JMSConsumer consumer;
+	private int count = 0;
+	private JMSProducer producer;
 	
 	@Override
 	public void onMessage(Message msg) {
@@ -38,7 +43,8 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 		try {
 			Queue replyToQueue = (Queue)msg.getJMSReplyTo();
 			Tweet tweet = msg.getBody(Tweet.class);
-			print(tweet.toString());
+			//print(tweet.toString());
+			count++;
 			
 			String userID = tweet.getUsername();
 			User user = Resources.RS.getUserById(userID);
@@ -53,13 +59,13 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 				}else{ //contains image
 					
 					tweet.setImgName(""+ Resources.RS.getNewImgName() + "");
-					jmsContext.createProducer().send(saveQueue, tweet); //save Image			
-					jmsContext.createProducer().send(thumbnailQueue, tweet); //create thumbnail
+					producer.send(saveQueue, tweet); //save Image			
+					producer.send(thumbnailQueue, tweet); //create thumbnail
 					
 				}
-				jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.TWEET, 1));	
+				producer.send(replyToQueue, new AckResponse(MessageType.TWEET, 1));	
 			}else
-				jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.TWEET, 1));
+				producer.send(replyToQueue, new AckResponse(MessageType.TWEET, 1));
 			
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -76,22 +82,29 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 			//lookup tweetQueue and set messageListener
 			String tweetQueueName ="tweetQueue";
 			Queue tweetQueue = (Queue) initialContext.lookup(tweetQueueName);
-			jmsContext.createConsumer(tweetQueue).setMessageListener(this);
+			consumer = jmsContext.createConsumer(tweetQueue);
 			
 			//lookup saveQueue
 			String saveQueueName ="saveQueue";
 			saveQueue = (Queue) initialContext.lookup(saveQueueName);
 			
-			
 			//lookup thumbnailQueue
 			String thumbnailQueueName ="thumbnailQueue";
 			thumbnailQueue = (Queue) initialContext.lookup(thumbnailQueueName);
+			
+			producer = jmsContext.createProducer();
+			consumer.setMessageListener(this);
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
 
 		print("started");
+	}
+	
+	public void stopListening(){
+		print("Stopping by browser, elaborated " + count);
+		consumer.close();
 	}
 	
 	private Context getContext() throws NamingException {

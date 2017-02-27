@@ -12,4 +12,6 @@ public abstract class Handler {
 		System.out.println("> " + identity + " > " + s);
 	}
 	
+	public abstract void stopListening();
+	
 }

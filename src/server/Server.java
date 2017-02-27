@@ -12,16 +12,20 @@ public class Server{
 		
 		print("starting");
 		
-		Thread requestHandler = new Thread(new RequestHandler("RequestHandler"));
+		RequestHandler rh = new RequestHandler("RequestHandler");
+		Thread requestHandler = new Thread(rh);
 		requestHandler.start();
 		
-		Thread tweetHandler = new Thread(new TweetHandler("TweetHandler"));
+		TweetHandler th = new TweetHandler("TweetHandler");
+		Thread tweetHandler = new Thread(th);
 		tweetHandler.start();
 		
-		Thread imageStorer = new Thread(new ImageStorer("ImageStorer"));
+		ImageStorer is = new ImageStorer("ImageStorer");
+		Thread imageStorer = new Thread(is);
 		imageStorer.start();
 		
-		Thread thumbnailCreator = new Thread(new ThumbnailCreator("ThumbnailCreator"));
+		ThumbnailCreator tc = new ThumbnailCreator("ThumbnailCreator");
+		Thread thumbnailCreator = new Thread(tc);
 		thumbnailCreator.start();
 		
 		Browser browser = new Browser();
@@ -33,6 +37,10 @@ public class Server{
         br.readLine();
         
         browser.control=false;
+        rh.stopListening();
+        is.stopListening();
+        tc.stopListening();
+        th.stopListening();
 	}
 	
 	public static void print(String s) {

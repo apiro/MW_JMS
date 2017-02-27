@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
+import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
@@ -31,11 +33,16 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 	}
 
 	private JMSContext jmsContext;
+	private JMSConsumer consumer;
+	private JMSProducer producer;
+	private int count = 0;
 	
 	@Override
 	public void onMessage(Message msg) {
 		
 		print("onMessage");
+		
+		count ++;
 		
 		try {
 			Queue replyToQueue = (Queue) msg.getJMSReplyTo();
@@ -47,10 +54,10 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					
 					if(createSubscription(request)){
 						print("new user registered [ " + request.getUsername() + " ]");
-						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.SUBSCRIBE, 1));	
+						producer.send(replyToQueue, new AckResponse(MessageType.SUBSCRIBE, 1));	
 					}else{
 						print("user registration error");
-						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.SUBSCRIBE, 0));	
+						producer.send(replyToQueue, new AckResponse(MessageType.SUBSCRIBE, 0));	
 					}
 					break;
 				case FOLLOW:
@@ -58,10 +65,10 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					
 					if(follow(request)){
 						print("updated following users by user [ " + request.getUsername() + " ]");
-						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.FOLLOW, 1));	
+						producer.send(replyToQueue, new AckResponse(MessageType.FOLLOW, 1));	
 					}else{
 						print("following registration error");
-						jmsContext.createProducer().send(replyToQueue, new AckResponse(MessageType.FOLLOW, 0));	
+						producer.send(replyToQueue, new AckResponse(MessageType.FOLLOW, 0));	
 					}
 					break;
 				case IMAGE:
@@ -70,10 +77,10 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					
 					if(replyImage != null){
 						print("loaded image requestes by user [ " + request.getUsername() + " ]");
-						jmsContext.createProducer().send(replyToQueue, new ImageResponse(MessageType.IMAGE, 1, replyImage));
+						producer.send(replyToQueue, new ImageResponse(MessageType.IMAGE, 1, replyImage));
 					}else{
 						print("load image error");
-						jmsContext.createProducer().send(replyToQueue, new ImageResponse(MessageType.IMAGE, 0, replyImage));
+						producer.send(replyToQueue, new ImageResponse(MessageType.IMAGE, 0, replyImage));
 					}
 					break;
 				case TIMELINE:
@@ -82,16 +89,16 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 					
 					if(replyTimeline != null){
 						print("loaded image requestes by user [ " + request.getUsername() + " ]");
-						jmsContext.createProducer().send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 1, replyTimeline));
+						producer.send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 1, replyTimeline));
 					}else{
 						print("load image error");
-						jmsContext.createProducer().send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 0, replyTimeline));
+						producer.send(replyToQueue, new TimelineResponse(MessageType.TIMELINE, 0, replyTimeline));
 					}
 					break;
 				default:
 					print("the system can't detect the type of the ClientRequest, generic error is sent back");
 					
-					jmsContext.createProducer().send(replyToQueue, new GenericErrorResponse());
+					producer.send(replyToQueue, new GenericErrorResponse());
 					break;
 			}
 		} catch (JMSException e) {
@@ -185,13 +192,21 @@ public class RequestHandler extends Handler implements MessageListener, Runnable
 			//lookup tweetQueue and set messageListener
 			String requestQueueName ="requestQueue";
 			Queue requestQueue = (Queue) initialContext.lookup(requestQueueName);
-			jmsContext.createConsumer(requestQueue).setMessageListener(this);
+			consumer = jmsContext.createConsumer(requestQueue);
+			consumer.setMessageListener(this);
+			
+			producer = jmsContext.createProducer();
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
 
 		print("started");
+	}
+	
+	public void stopListening(){
+		print("Stopping by browser, elaborated " + count);
+		consumer.close();
 	}
 	
 	private Context getContext() throws NamingException {

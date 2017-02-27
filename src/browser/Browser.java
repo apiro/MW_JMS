@@ -1,7 +1,9 @@
 package browser;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
@@ -13,6 +15,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import server.Handler;
 import server.ImageStorer;
 import server.RequestHandler;
 import server.ThumbnailCreator;
@@ -25,7 +28,7 @@ public class Browser extends Thread{
 	public void run() {
 		HashMap<String, Queue> queues= new HashMap<String, Queue>();
 		QueueBrowser[] browsers= new QueueBrowser[4];
-		Runnable[] runnable = new Runnable[4];
+		List<ArrayList<Handler>> handlers = new ArrayList<ArrayList<Handler>>(4);
 		
 		try {
 			JMSContext context = ((ConnectionFactory) getContext().lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
@@ -40,10 +43,10 @@ public class Browser extends Thread{
 			browsers[2]=(context.createBrowser(queues.get(("thumbnailQueue"))));
 			browsers[3]=(context.createBrowser(queues.get(("requestQueue"))));
 			
-			runnable[0]= new TweetHandler("TweetHandler_B");
-			runnable[1]=new ImageStorer("ImageStorer_B");
-			runnable[2]=new ThumbnailCreator("ThumbnailCreator_B");
-			runnable[3]=new RequestHandler("RequestHandler_B");
+			handlers.add(0,new ArrayList<Handler>());//("TweetHandler_B");
+			handlers.add(1,new ArrayList<Handler>());//("ImageStorer_B");
+			handlers.add(2,new ArrayList<Handler>());//("ThumbnailCreator_B");
+			handlers.add(3,new ArrayList<Handler>());//("RequestHandler_B");
 		
 		} catch (NamingException e1) {
 			return;
@@ -53,7 +56,7 @@ public class Browser extends Thread{
 		
 		while(control) {
 			try {
-				Thread.sleep(10000);	//check every 10 seconds
+				Thread.sleep(5000);	//check every 10 seconds
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				return;
@@ -72,14 +75,52 @@ public class Browser extends Thread{
 					}
 					//If there are more than 10 messages in the queue, it will run a new thread 
 					//	with the handler for that queue
-					if (count > 10){
-						Thread t = new Thread(runnable[i]);
-						t.start();
+					if(count < 4 && !handlers.get(i).isEmpty()){
+						//print("Stopping by browser");
+						handlers.get(i).remove(0).stopListening();
+					} else if (count > 10){
+						switch (i){
+						case 0: 
+							TweetHandler th = new TweetHandler("TweetHandler_B");
+							handlers.get(i).add(th);
+							th.print("Starting by browser");
+							Thread t0 = new Thread(((Runnable) th));
+							t0.start();
+							break;
+						case 1: 
+							ImageStorer is = new ImageStorer("ImageStorer_B");
+							handlers.get(i).add(is);
+							is.print("Starting by browser");
+							Thread t1 = new Thread(((Runnable) is));
+							t1.start();
+							break;
+						case 2:
+							ThumbnailCreator tc = new ThumbnailCreator("ThumbnailCreator_B");
+							handlers.get(i).add(tc);
+							tc.print("Starting by browser");
+							Thread t2 = new Thread(((Runnable) tc));
+							t2.start();
+							break;
+						case 3:
+							RequestHandler rh = new RequestHandler("RequestHandler_B");
+							handlers.get(i).add(rh);
+							rh.print("Starting by browser");
+							Thread t3 = new Thread(((Runnable) rh));
+							t3.start();
+							break;
+						default:
+							break;
 					}
+					} 
 				} catch (JMSException e) {
 					e.printStackTrace();
 				} 
 			}
+		}
+		
+		for(ArrayList<Handler> a : handlers){
+			for(Handler h : a)
+				h.stopListening();
 		}
 	}
 

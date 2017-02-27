@@ -33,7 +33,7 @@ import common.messages.TimelineResponse;
 import javax.imageio.ImageIO;
 import javax.jms.ConnectionFactory;
 
-public class Client implements MessageListener {
+public class ClientLoadTest implements MessageListener {
 	
 	static String username = null;
 	static Boolean control = true;
@@ -47,7 +47,7 @@ public class Client implements MessageListener {
 		String tweetQueueName = "tweetQueue";
 		String requestQueueName = "requestQueue";
 		
-		Context initialContext = Client.getContext(); 
+		Context initialContext = ClientLoadTest.getContext(); 
 		JMSContext jmsContext = ((ConnectionFactory) initialContext.lookup("java:comp/DefaultJMSConnectionFactory")).createContext();
 		
 		Queue tweetQueue = (Queue) initialContext.lookup(tweetQueueName);
@@ -56,7 +56,7 @@ public class Client implements MessageListener {
 		
 		JMSProducer jmsProducer = jmsContext.createProducer().setJMSReplyTo(subscribeQueue);
 		
-		jmsContext.createConsumer(subscribeQueue).setMessageListener(new Client());
+		jmsContext.createConsumer(subscribeQueue).setMessageListener(new ClientLoadTest());
 		
 		interact(requestQueue, tweetQueue, jmsProducer);
 		
@@ -84,8 +84,16 @@ public class Client implements MessageListener {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		print("Type your username: ");
 		username = br.readLine();
-		
+		int num = 1;
 		while(control) {
+			
+			print("Insert number o requests (default 1) :");
+			try	{
+				num = Integer.parseInt(br.readLine());
+				}
+			catch (NumberFormatException e){
+				num = 1;
+			}
 			
 			print("Which action do you want to perform ?");
 			print("\n[1] Register \n[2] Send Tweet with Image \n[3] Send Tweet without Image \n[4] RequestImage \n[5] Follow \n[6] RequestTimeline \nDEFAULT QUITS");
@@ -111,7 +119,8 @@ public class Client implements MessageListener {
 					
 					tweet.setText(caption);
 					print(tweet.toString() + " is going to be sent");
-					sendRequest(jmsProducer, tweetQueue, tweet);
+					for (int i=0; i<num; i++)
+						sendRequest(jmsProducer, tweetQueue, tweet);
 					break;
 	        	case "3": //Tweet w/o image
 	        		initTweetTemplate(false);
@@ -120,14 +129,16 @@ public class Client implements MessageListener {
 					
 					tweet.setText(caption);
 					print(tweet.toString() + " is going to be sent");
-					sendRequest(jmsProducer, tweetQueue, tweet);
+					for (int i=0; i<num; i++)
+						sendRequest(jmsProducer, tweetQueue, tweet);
 					break;
 	        	case "4": //get image
 	        		print("Type the image ID: ");
 	        		String imageID = br.readLine();
 	        		
 	        		request = new ImageRequest(username, imageID);
-	        		sendRequest(jmsProducer, requestQueue, request);
+	        		for (int i=0; i<num; i++)
+	        			sendRequest(jmsProducer, requestQueue, request);
 	        		break;
 	        	case "5": //follow
 	        		print("Type the users you want to follow (space separated): ");
@@ -140,7 +151,8 @@ public class Client implements MessageListener {
 	        		break;
 	        	case "6": //get timeline
 	        		request = new TimelineRequest(username);
-	        		sendRequest(jmsProducer, requestQueue, request);
+	        		for (int i=0; i<num; i++)
+	        			sendRequest(jmsProducer, requestQueue, request);
 	        		break;
 	        	default :
 	        		control = false;
@@ -179,7 +191,7 @@ public class Client implements MessageListener {
 	@Override
 	public void onMessage(Message msg) {
 		
-		print("onMessage");
+		//print("onMessage");
 		try {
 			
 			renderResponse(msg.getBody(ServerResponse.class));
@@ -194,7 +206,7 @@ public class Client implements MessageListener {
 	private void renderResponse(ServerResponse body) {
 		
 		ServerResponse bd;
-		print("renderResponse");
+		//print("renderResponse");
 		switch(body.getType()){
 			case TIMELINE:
 				bd = (TimelineResponse) body;
