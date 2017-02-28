@@ -1,6 +1,6 @@
 # Project JMS for the course Middleware Technologies for Distributed Systems, year 2016-17
 
-(Course Page)[http://corsi.dei.polimi.it/distsys/]
+[Course Page](http://corsi.dei.polimi.it/distsys/)
 
 The project has been deployed using Glassfish 4.1.
 The following JMS queues need to be created in glassfish:
