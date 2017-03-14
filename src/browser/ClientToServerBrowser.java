@@ -56,7 +56,7 @@ public class ClientToServerBrowser {
 				if (obj instanceof ObjectMessage) {
 					
 					objMsg = (ObjectMessage)obj;
-					request = (Tweet)objMsg.getObject();
+					request = (ClientRequest)objMsg.getObject();
 					print("Detected ClientRequest");
 					print("Sender -> " + request.getUsername());
 					print(" | Request -> " + request.toString());

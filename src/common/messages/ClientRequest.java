@@ -18,17 +18,6 @@ public class ClientRequest implements Serializable {
 	// Se la richiesta � IMAGE, -> ci sar� il nome dell'immagine
 	// Se la richieta � TIMELINE, -> boh!
 	
-//	public Request(String userID, MessageType type, int name) {
-//		super(type);
-//		this.userID = userID;
-//		getParam().add(name);
-//	}
-//	
-//	public Request(String userID, MessageType type, ArrayList<String> users) {
-//		super(type);
-//		this.userID = userID;
-//		getParam().addAll(users);
-//	}
 	
 	// Request used when i want to subscribe to the tweet service
 	public ClientRequest(String username, MessageType type) {
