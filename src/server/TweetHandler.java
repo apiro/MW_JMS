@@ -56,6 +56,7 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 						Timeline timeline = u.getMytimeline();
 						timeline.addTweet(finalTweet);
 					}
+					user.getMytimeline().addTweet(finalTweet); //add my tweets to my timeline
 				}else{ //contains image
 					
 					tweet.setImgName(""+ Resources.RS.getNewImgName() + "");

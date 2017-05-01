@@ -64,7 +64,7 @@ public class Client implements MessageListener {
 
 	private static void initTweetTemplate(boolean withImage) throws IOException {
 		
-		print("initTweetTemplate");
+		//print("initTweetTemplate");
 		if (withImage){
 			BufferedImage fakeImage = ImageIO.read(new File("resources/sample.jpg"));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -110,7 +110,7 @@ public class Client implements MessageListener {
 					caption = br.readLine();
 					
 					tweet.setText(caption);
-					print(tweet.toString() + " is going to be sent");
+					//print(tweet.toString() + " is going to be sent");
 					sendRequest(jmsProducer, tweetQueue, tweet);
 					break;
 	        	case "3": //Tweet w/o image
@@ -119,7 +119,7 @@ public class Client implements MessageListener {
 					caption = br.readLine();
 					
 					tweet.setText(caption);
-					print(tweet.toString() + " is going to be sent");
+					//print(tweet.toString() + " is going to be sent");
 					sendRequest(jmsProducer, tweetQueue, tweet);
 					break;
 	        	case "4": //get image
@@ -155,18 +155,18 @@ public class Client implements MessageListener {
 		
 		print("sendRequest - " + request.getType().toString());
 		
-		print("> Sending request");
+		//print("> Sending request");
 		
 		jmsProducer.send(requestQueue, request);
 		
-		print("> Request sent");
+		print("Request sent");
 		return true;
 		
 	}
 
 	private static Context getContext() throws NamingException {
 		
-		print("getContext");
+		//print("getContext");
 		
 		Properties props = new Properties();
 		props.setProperty("java.naming.factory.initial", "com.sun.enterprise.naming.SerialInitContextFactory");
@@ -179,7 +179,7 @@ public class Client implements MessageListener {
 	@Override
 	public void onMessage(Message msg) {
 		
-		print("onMessage");
+		//print("onMessage");
 		try {
 			
 			renderResponse(msg.getBody(ServerResponse.class));
@@ -193,8 +193,8 @@ public class Client implements MessageListener {
 
 	private void renderResponse(ServerResponse body) {
 		
-		ServerResponse bd;
-		print("renderResponse");
+		ServerResponse bd = body;
+		//print("renderResponse");
 		switch(body.getType()){
 			case TIMELINE:
 				bd = (TimelineResponse) body;
@@ -204,7 +204,7 @@ public class Client implements MessageListener {
 			default:
 				bd = body;
 		}
-		print(bd.render());
+		print("RESPONSE: " + bd.render());
 	}
 
 	public static void print(String s) {

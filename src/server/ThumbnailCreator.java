@@ -67,6 +67,7 @@ public class ThumbnailCreator extends Handler implements MessageListener, Runnab
 				Timeline timeline = u.getMytimeline();
 				timeline.addTweet(finalTweet);
 			}
+			user.getMytimeline().addTweet(finalTweet); //add my tweets to my timeline
 			
 			//System.out.println(msg);
 			

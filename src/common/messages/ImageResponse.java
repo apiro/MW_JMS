@@ -38,9 +38,9 @@ public class ImageResponse extends ServerResponse {
 			JLabel label = new JLabel(new ImageIcon(img));
 			frame.add(label);
 			frame.setVisible(true);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			
+			//e.printStackTrace();
 		}
 		
 		return super.render();
