@@ -66,7 +66,7 @@ public class TweetHandler extends Handler implements MessageListener, Runnable{
 				}
 				producer.send(replyToQueue, new AckResponse(MessageType.TWEET, 1));	
 			}else
-				producer.send(replyToQueue, new AckResponse(MessageType.TWEET, 1));
+				producer.send(replyToQueue, new AckResponse(MessageType.TWEET, 0));
 			
 		} catch (JMSException e) {
 			e.printStackTrace();
